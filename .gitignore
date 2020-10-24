@@ -136,3 +136,7 @@ dmypy.json
 
 *.csv
 *.txt
+
+
+*.html
+jobs_files/
