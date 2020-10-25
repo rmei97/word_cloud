@@ -13,7 +13,18 @@ with open('jobs.html', 'r') as file:
 
 
 """psuedo
-for job in jobs_list:
+for job_link in jobs_list:
 	get all the data via function
+	request = requests.get(job_link)
 
 """
+
+
+def job_info_from_soup(soup):
+	temp = job_soup.find('div',class_ = "topcard__content-left")
+	title = temp.find('h1', class_ = "topcard__title").text
+	company = temp.find('a', class_ = "topcard__org-name-link topcard__flavor--black-link").text
+	location = temp.find('span', class_ = "topcard__flavor topcard__flavor--bullet").text
+	salary = temp.find('div',class_ = "salary topcard__flavor--salary").text
+	return [temp, title, company, location, salary]
+
