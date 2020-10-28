@@ -1,3 +1,4 @@
+import numpy
 import json
 import requests
 from bs4 import BeautifulSoup
@@ -7,12 +8,25 @@ import sqlite3
 import os
 
 def job_info_from_soup(soup):
-	# temp = soup.find('div',class_ = "topcard__content-left")
-	#variables
-	title = soup.find('h1', class_ = "topcard__title").text
-	company = soup.find('a', class_ = "topcard__org-name-link topcard__flavor--black-link").text
-	location = soup.find('span', class_ = "topcard__flavor topcard__flavor--bullet").text
-	description = soup.find('div', class_ = "description__text description__text--rich").text
+	try:
+		title = soup.find('h1', class_ = "topcard__title").text
+	except AttributeError:
+		title = numpy.nan
+
+	try:
+		company = soup.find('a', class_ = "topcard__org-name-link topcard__flavor--black-link").text
+	except AttributeError:
+		company = numpy.nan
+	
+	try:
+		location = soup.find('span', class_ = "topcard__flavor topcard__flavor--bullet").text
+	except AttributeError:
+		location = numpy.nan
+	
+	try:
+		description = soup.find('div', class_ = "description__text description__text--rich").text
+	except AttributeError:
+		description = numpy.nan
 	# salary = soup.find('div',class_ = "salary topcard__flavor--salary").text
 	return [title, company, location, description]
 
@@ -39,26 +53,35 @@ with open('jobs.html', 'r') as file:
 #### script
 conn = sqlite3.connect('jobs.db')
 c = conn.cursor()
-
-query = """CREATE TABLE IF NOT EXISTS listings (num INTEGER PRIMARY KEY, title TEXT NOT NULL, company TEXT NOT NULL, location TEXT NOT NULL, description TEXT NOT NULL)"""
+query = """CREATE TABLE IF NOT EXISTS listings (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)"""
 c.execute(query)
-
    
-index = 1
-for job_link in jobs_list[:3]:
-	request = requests.get(job_link['href'])
-	time.sleep(1)
-	print('sleep')
+index = 981
+for job_link in jobs_list[index:]:
+
+	try:
+		request = requests.get(job_link['href'])
+	except:
+		print('Retry attempt at index: ', index)
+		time.sleep(60) #if we fail to get the link wait 1 minute and request again
+		request = requests.get(job_link['href'])
+
+	time.sleep(1) #delay to not get locked out
+
 	posting_soup = BeautifulSoup(request.content, 'lxml')
-	
 	data = job_info_from_soup(posting_soup)
+
 	data = [index] + data
-	query = """INSERT INTO listings VALUES(?, ?, ?, ?, ?);"""
+	query = """INSERT INTO listings VALUES (?, ?, ?, ?, ?);"""
 	c.execute(query, data)
 
 	index += 1
-	print('Stored')
-conn.commit()
+	#watch to see its still running
+	if index % 5 == 0:
+		conn.commit()
+		print('Stored and commited at index ', index)
+
+conn.commit() #final commit()
 conn.close()
-print('Connection Closed')
+print('Final commit and closed connection')
 
