@@ -137,6 +137,8 @@ dmypy.json
 *.csv
 *.txt
 
-
+#html pages for scraping comes with directories with other components
 *.html
 jobs_files/
+non_data_science_files/
+data_science_files/
