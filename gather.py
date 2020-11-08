@@ -44,7 +44,8 @@ def insert():
 	return None
 
 ###### turn the contents into soup and store all the links into jobs variable
-with open('jobs.html', 'r') as file:
+# with open('data_scientist.html', 'r') as file:
+with open('non_data_science.htm', 'r') as file:
     contents = file.read()
     search_soup = BeautifulSoup(contents, 'lxml')
     jobs_list = search_soup.findAll('a', class_ = "result-card__full-card-link")
@@ -53,10 +54,15 @@ with open('jobs.html', 'r') as file:
 #### script
 conn = sqlite3.connect('jobs.db')
 c = conn.cursor()
-query = """CREATE TABLE IF NOT EXISTS listings (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)"""
+
+# job_type = data_science
+job_type = non_data_science
+
+#query = """CREATE TABLE IF NOT EXISTS {} (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)""".format(job_type)
+query = """CREATE TABLE IF NOT EXISTS {} (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)""".format(job_type)
 c.execute(query)
    
-index = 981
+index = 0
 for job_link in jobs_list[index:]:
 
 	try:
@@ -72,7 +78,7 @@ for job_link in jobs_list[index:]:
 	data = job_info_from_soup(posting_soup)
 
 	data = [index] + data
-	query = """INSERT INTO listings VALUES (?, ?, ?, ?, ?);"""
+	query = """INSERT INTO {} VALUES (?, ?, ?, ?, ?);""".format(job_type)
 	c.execute(query, data)
 
 	index += 1
