@@ -44,8 +44,9 @@ def insert():
 	return None
 
 ###### turn the contents into soup and store all the links into jobs variable
-# with open('data_scientist.html', 'r') as file:
-with open('non_data_science.htm', 'r') as file:
+#uncomment for which ever type of job
+# with open('data_science.html', 'r') as file:  # posting for data science roles
+with open('non_data_science.html', 'r') as file: #postings for non ds roles
     contents = file.read()
     search_soup = BeautifulSoup(contents, 'lxml')
     jobs_list = search_soup.findAll('a', class_ = "result-card__full-card-link")
@@ -55,8 +56,8 @@ with open('non_data_science.htm', 'r') as file:
 conn = sqlite3.connect('jobs.db')
 c = conn.cursor()
 
-# job_type = data_science
-job_type = non_data_science
+# job_type = 'data_science'
+job_type = 'non_data_science'
 
 #query = """CREATE TABLE IF NOT EXISTS {} (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)""".format(job_type)
 query = """CREATE TABLE IF NOT EXISTS {} (num INTEGER PRIMARY KEY, title TEXT, company TEXT, location TEXT, description TEXT)""".format(job_type)
